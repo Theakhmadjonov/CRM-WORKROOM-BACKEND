@@ -16,6 +16,7 @@ export class AuthController {
   @HttpCode(200)
   async sendOtp(@Body() body: SendOtpDto) {
     try {
+      console.log(111);
       return await this.authService.sendOtp(body);
     } catch (error) {
       throw new HttpException(error.message, error.status);

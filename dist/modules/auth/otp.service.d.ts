@@ -1,0 +1,20 @@
+import { RedisService } from 'src/core/database/redis.service';
+import { EskizService } from './eskiz.service';
+export declare class OtpService {
+    private redisService;
+    private eskizService;
+    private ttlExpireOtp;
+    private hourlyTTLExpireOtp;
+    private hourlyOtpAttempts;
+    private maxFailedOtpAttempt;
+    constructor(redisService: RedisService, eskizService: EskizService);
+    canSmsRequest(phone_number: string): Promise<void>;
+    sendSms(phone_number: string): Promise<{
+        message: string;
+    }>;
+    checkSmsLimit(key: string): Promise<void>;
+    trackSmsRequest(key: string): Promise<void>;
+    recordFailedAttempts(phone_number: string): Promise<void>;
+    verifyOtpCode(phone_number: string, code: string): Promise<void>;
+    isBlockedUser(phone_number: string): Promise<void>;
+}
