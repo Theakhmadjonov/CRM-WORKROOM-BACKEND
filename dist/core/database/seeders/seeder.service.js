@@ -23,12 +23,14 @@ let SeederService = SeederService_1 = class SeederService {
     configService;
     username;
     password;
+    email;
     logger = new common_1.Logger(SeederService_1.name);
     constructor(db, configService) {
         this.db = db;
         this.configService = configService;
-        this.username = this.configService.get('SUPER_ADMIN_USERNAME');
-        this.password = this.configService.get('SUPER_ADMIN_PASSWORD');
+        this.username = this.configService.get("SUPER_ADMIN_USERNAME");
+        this.password = this.configService.get("SUPER_ADMIN_PASSWORD");
+        this.email = this.configService.get("SUPER_ADMIN_EMAIL");
     }
     onModuleInit() {
         this.initSeeder();
@@ -37,7 +39,7 @@ let SeederService = SeederService_1 = class SeederService {
         try {
             await this.checkExistingAdmin();
             await this.createAdmin();
-            this.logger.log('admin created');
+            this.logger.log("admin created");
         }
         catch (error) {
             this.logger.warn(error.message);
@@ -51,12 +53,16 @@ let SeederService = SeederService_1 = class SeederService {
         });
         if (!findAdmin)
             return true;
-        throw new Error('admin existed!!');
+        throw new Error("admin existed!!");
     }
     async createAdmin() {
         const hashedPassword = await bcrypt_1.default.hash(this.password, 12);
         await this.db.prisma.user.create({
-            data: { username: this.username, password: hashedPassword },
+            data: {
+                username: this.username,
+                password: hashedPassword,
+                email: this.email,
+            },
         });
     }
 };

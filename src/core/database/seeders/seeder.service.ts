@@ -1,18 +1,20 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { ConfigService } from '@nestjs/config';
-import bcrypt from 'bcrypt';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { ConfigService } from "@nestjs/config";
+import bcrypt from "bcrypt";
 @Injectable()
 export class SeederService implements OnModuleInit {
   username: string;
   password: string;
+  email: string;
   public logger: Logger = new Logger(SeederService.name);
   constructor(
     private db: PrismaService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
-    this.username = this.configService.get('SUPER_ADMIN_USERNAME') as string;
-    this.password = this.configService.get('SUPER_ADMIN_PASSWORD') as string;
+    this.username = this.configService.get("SUPER_ADMIN_USERNAME") as string;
+    this.password = this.configService.get("SUPER_ADMIN_PASSWORD") as string;
+    this.email = this.configService.get("SUPER_ADMIN_EMAIL") as string;
   }
   onModuleInit() {
     this.initSeeder();
@@ -21,7 +23,7 @@ export class SeederService implements OnModuleInit {
     try {
       await this.checkExistingAdmin();
       await this.createAdmin();
-      this.logger.log('admin created');
+      this.logger.log("admin created");
     } catch (error) {
       this.logger.warn(error.message);
     }
@@ -33,12 +35,16 @@ export class SeederService implements OnModuleInit {
       },
     });
     if (!findAdmin) return true;
-    throw new Error('admin existed!!');
+    throw new Error("admin existed!!");
   }
   async createAdmin() {
     const hashedPassword = await bcrypt.hash(this.password, 12);
     await this.db.prisma.user.create({
-      data: { username: this.username, password: hashedPassword },
+      data: {
+        username: this.username,
+        password: hashedPassword,
+        email: this.email,
+      },
     });
   }
 }
