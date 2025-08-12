@@ -1,10 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { SendOtpDto } from './dto/send-otp.dto';
-import { OtpService } from './otp.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { SendOtpDto } from "./dto/send-otp.dto";
+import { OtpService } from "./otp.service";
+import { LoginAuthDto } from "./dto/create-auth.dto";
+import bcrypt from "bcrypt";
+import { PrismaService } from "src/core/database/prisma.service";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
-  constructor(private otpService: OtpService) {}
+  constructor(
+    private otpService: OtpService,
+    private db: PrismaService,
+    private jwt: JwtService
+  ) {}
   async sendOtp(body: SendOtpDto) {
     const { phone_number } = body;
     const data = await this.otpService.sendSms(phone_number);
@@ -14,10 +22,49 @@ export class AuthService {
     await this.otpService.isBlockedUser(phone_number);
     await this.otpService.verifyOtpCode(phone_number, code);
     return {
-      message: 'success',
+      message: "success",
     };
   }
   async register() {}
-  async login() {}
+
+  async login(loginAuthDto: LoginAuthDto) {
+    const findEmail = await this.db.prisma.user.findUnique({
+      where: {
+        email: loginAuthDto.email,
+      },
+    });
+
+    if (!findEmail) throw new NotFoundException("Email or password incorrect");
+
+    const comparePassword = await bcrypt.compare(
+      loginAuthDto.password,
+      findEmail.password
+    );
+
+    if (!comparePassword)
+      throw new NotFoundException("Email or password incorrect");
+
+    const token = await this.jwt.signAsync({ userId: findEmail.id });
+
+    return token;
+  }
+
+  async me(userId: string) {
+    const findUser = await this.db.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+      },
+    });
+
+    if (!findUser) throw new NotFoundException("Information not found");
+
+    return findUser;
+  }
+
   async logout() {}
 }
