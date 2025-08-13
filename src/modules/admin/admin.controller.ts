@@ -1,34 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { QuestionAnswer } from './dto/question-answer.dto';
 
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  @Post()
-  create(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.create(createAdminDto);
+  @Post('user-profile/create/question')
+  async createQuestion(@Body() createQuestionDto: CreateQuestionDto) {
+    try {
+      return await this.adminService.createQuestion(createQuestionDto);
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
+  @Get('questions')
+  async getQuestions(@Query('step_number') step_number: string) {
+    try {
+      return await this.adminService.getQuestions(+step_number);
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.adminService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.update(+id, updateAdminDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.adminService.remove(+id);
+  @Post('question-answer')
+  async questionAnswer(@Body() questionAnswer: QuestionAnswer) {
+    try {
+      return await this.adminService.addAnswerQuestion(questionAnswer);
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
   }
 }
