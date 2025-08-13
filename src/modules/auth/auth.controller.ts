@@ -62,9 +62,7 @@ export class AuthController {
   @Get("me")
   async me(@Req() req: Request) {
     const userId = req["userId"];
-
     const user = await this.authService.me(userId);
-
     return { user };
   }
 
