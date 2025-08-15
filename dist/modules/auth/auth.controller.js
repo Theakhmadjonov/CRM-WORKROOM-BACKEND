@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const send_otp_dto_1 = require("./dto/send-otp.dto");
 const verify_sms_code_dto_1 = require("./dto/verify.sms.code.dto");
+const create_auth_dto_1 = require("./dto/create-auth.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -41,12 +42,32 @@ let AuthController = class AuthController {
         }
     }
     async register() { }
-    async login() { }
-    async logout() { }
+    async login(loginAuthDto, res) {
+        const token = await this.authService.login(loginAuthDto);
+        res.cookie("token", token, {
+            httpOnly: true,
+            path: "/",
+            maxAge: 24 * 60 * 60 * 1000,
+            secure: false,
+            sameSite: "lax",
+        });
+        return { token };
+    }
+    async me(req) {
+        const userId = req["userId"];
+        const user = await this.authService.me(userId);
+        return { user };
+    }
+    async logout(res) {
+        res.clearCookie("token");
+        return {
+            message: "Successfully log out",
+        };
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
-    (0, common_1.Post)('send-otp'),
+    (0, common_1.Post)("send-otp"),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -54,7 +75,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "sendOtp", null);
 __decorate([
-    (0, common_1.Post)('verify-otp'),
+    (0, common_1.Post)("verify-otp"),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -68,19 +89,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)("login"),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [create_auth_dto_1.LoginAuthDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Get)("me"),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "me", null);
+__decorate([
+    (0, common_1.Post)("logout"),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 exports.AuthController = AuthController = __decorate([
-    (0, common_1.Controller)('auth'),
+    (0, common_1.Controller)("auth"),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

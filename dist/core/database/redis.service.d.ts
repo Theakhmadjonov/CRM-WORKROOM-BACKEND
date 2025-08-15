@@ -1,6 +1,6 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Logger, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
 export declare class RedisService implements OnModuleInit {
     private configService;
     redis: Redis;
@@ -13,4 +13,5 @@ export declare class RedisService implements OnModuleInit {
     getTTLKey(key: string): Promise<number>;
     setExpireKey(key: string, expire: number): Promise<void>;
     incrementKey(key: string): Promise<void>;
+    setSessionTokenUser(phone: string, token: string): Promise<void>;
 }

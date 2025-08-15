@@ -28,6 +28,10 @@ let OtpService = class OtpService {
         this.redisService = redisService;
         this.eskizService = eskizService;
     }
+    getSessionToken() {
+        const token = crypto.randomUUID();
+        return token;
+    }
     async canSmsRequest(phone_number) {
         const key = `sms:otp:${phone_number}:code`;
         const keyExists = await this.redisService.redis.exists(key);
@@ -89,6 +93,8 @@ let OtpService = class OtpService {
         }
         await this.redisService.delKey(key);
         await this.redisService.delKey(`sms:otp:${phone_number}:failed:attempts`);
+        const sessionToken = this.getSessionToken();
+        return sessionToken;
     }
     async isBlockedUser(phone_number) {
         const keyBlockedUser = `sms:otp:${phone_number}:blocked`;

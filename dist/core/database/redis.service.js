@@ -24,22 +24,22 @@ let RedisService = RedisService_1 = class RedisService {
     constructor(configService) {
         this.configService = configService;
         this.redis = new ioredis_1.default({
-            host: this.configService.get('REDIS_HOST'),
-            port: +this.configService.get('REDIS_PORT'),
+            host: this.configService.get("REDIS_HOST"),
+            port: +this.configService.get("REDIS_PORT"),
         });
     }
     async onModuleInit() {
         try {
-            this.redis.on('error', (err) => {
+            this.redis.on("error", (err) => {
                 throw new Error(err.message);
             });
-            this.redis.on('connect', () => {
-                this.logger.log('Redis connected');
+            this.redis.on("connect", () => {
+                this.logger.log("Redis connected");
             });
         }
         catch (error) {
             this.redis.disconnect();
-            this.logger.error('Redis disconnected');
+            this.logger.error("Redis disconnected");
         }
     }
     async addKey(key, value, expire) {
@@ -61,6 +61,9 @@ let RedisService = RedisService_1 = class RedisService {
     }
     async incrementKey(key) {
         await this.redis.incr(key);
+    }
+    async setSessionTokenUser(phone, token) {
+        await this.redis.setex(`session:${phone}`, 300, token);
     }
 };
 exports.RedisService = RedisService;

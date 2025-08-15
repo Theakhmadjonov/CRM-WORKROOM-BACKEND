@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { CreateQuestionDto } from './dto/create-question.dto';
-import { PrismaService } from 'src/core/database/prisma.service';
-import { QuestionAnswer } from './dto/question-answer.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateQuestionDto } from "./dto/create-question.dto";
+import { PrismaService } from "src/core/database/prisma.service";
+import { QuestionAnswer } from "./dto/question-answer.dto";
 
 @Injectable()
 export class AdminService {
@@ -25,12 +25,12 @@ export class AdminService {
               option_value,
             },
           });
-        },
+        }
       );
       await Promise.all([...options]);
     }
     return {
-      message: 'success',
+      message: "success",
       question_id: question.id,
     };
   }
@@ -62,11 +62,11 @@ export class AdminService {
               answer_id,
             },
           });
-        },
+        }
       );
       await Promise.all([...answerOptions]);
       return {
-        message: 'Answers added',
+        message: "Answers added",
       };
     }
   }

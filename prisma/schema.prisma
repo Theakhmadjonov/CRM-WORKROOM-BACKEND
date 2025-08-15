@@ -50,6 +50,7 @@ model UserProfileQuestionAnswers {
   id             String                  @id @default(uuid())
   question_id    String                  @unique
   answer_text    String
+  user_id        String?
   question       UserProfileQuestions    @relation(fields: [question_id], references: [id], onDelete: Cascade)
   answer_options SelectedAnswerOptions[]
 

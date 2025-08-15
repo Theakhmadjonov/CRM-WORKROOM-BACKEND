@@ -20,7 +20,7 @@ export class AuthService {
   }
   async verifyOtp(phone_number: string, code: string) {
     await this.otpService.isBlockedUser(phone_number);
-    await this.otpService.verifyOtpCode(phone_number, code);
+    const sessionToken = await this.otpService.verifyOtpCode(phone_number, code);
     return {
       message: "success",
     };
