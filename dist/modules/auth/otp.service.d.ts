@@ -1,5 +1,5 @@
-import { RedisService } from 'src/core/database/redis.service';
-import { EskizService } from './eskiz.service';
+import { RedisService } from "src/core/database/redis.service";
+import { EskizService } from "./eskiz.service";
 export declare class OtpService {
     private redisService;
     private eskizService;
@@ -17,5 +17,7 @@ export declare class OtpService {
     trackSmsRequest(key: string): Promise<void>;
     recordFailedAttempts(phone_number: string): Promise<void>;
     verifyOtpCode(phone_number: string, code: string): Promise<`${string}-${string}-${string}-${string}-${string}`>;
+    checkTokenUser(key: string, token: string): Promise<boolean>;
     isBlockedUser(phone_number: string): Promise<void>;
+    delTokenUser(key: string): Promise<void>;
 }

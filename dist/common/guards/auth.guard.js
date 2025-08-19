@@ -38,7 +38,7 @@ let AuthGuard = class AuthGuard {
                 where: { id: userId },
             });
             if (!user)
-                return false;
+                throw new common_1.NotFoundException("User not found");
             request.userId = userId;
             return true;
         }

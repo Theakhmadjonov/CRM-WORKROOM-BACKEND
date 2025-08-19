@@ -21,7 +21,7 @@ __decorate([
     __metadata("design:type", String)
 ], LoginAuthDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsStrongPassword)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], LoginAuthDto.prototype, "password", void 0);
 //# sourceMappingURL=create-auth.dto.js.map

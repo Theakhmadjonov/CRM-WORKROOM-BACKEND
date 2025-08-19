@@ -18,14 +18,17 @@ const otp_service_1 = require("./otp.service");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const prisma_service_1 = require("../../core/database/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
+const s3Service_1 = require("../../core/storage/s3/s3Service");
 let AuthService = class AuthService {
     otpService;
     db;
     jwt;
-    constructor(otpService, db, jwt) {
+    s3;
+    constructor(otpService, db, jwt, s3) {
         this.otpService = otpService;
         this.db = db;
         this.jwt = jwt;
+        this.s3 = s3;
     }
     async sendOtp(body) {
         const { phone_number } = body;
@@ -37,9 +40,68 @@ let AuthService = class AuthService {
         const sessionToken = await this.otpService.verifyOtpCode(phone_number, code);
         return {
             message: "success",
+            sessionToken,
         };
     }
-    async register() { }
+    async register(data, sessionToken) {
+        const findUser = await this.db.prisma.user.findUnique({
+            where: { email: data.email },
+        });
+        const findByPhoneUser = await this.db.prisma.user.findUnique({
+            where: { phone_number: data.phone },
+        });
+        if (findUser || findByPhoneUser)
+            throw new common_1.ConflictException("Email or phone_number already exists");
+        const key = `session:${data.phone}`;
+        await this.otpService.checkTokenUser(key, sessionToken);
+        const hashedPassword = await bcrypt_1.default.hash(data.password, 12);
+        const user = await this.db.prisma.user.create({
+            data: {
+                username: data.email,
+                email: data.email,
+                phone_number: data.phone,
+                password: hashedPassword,
+            },
+        });
+        const allAnswers = [
+            ...(data.secondStepData || []),
+            ...(data.thirdStepData || []),
+        ];
+        for (const ans of allAnswers) {
+            const userAnswer = await this.db.prisma.userProfileQuestionAnswers.create({
+                data: {
+                    question_id: ans.question_id,
+                    user_id: user.id,
+                    answer_text: ans.answer_text ?? null,
+                },
+            });
+            if (ans.option_id) {
+                await this.db.prisma.selectedAnswerOptions.create({
+                    data: {
+                        answer_id: userAnswer.id,
+                        option_id: ans.option_id,
+                    },
+                });
+            }
+        }
+        if (data.fourthStepData?.emails?.length) {
+            for (const email of data.fourthStepData.emails) {
+                const existUser = await this.db.prisma.user.findUnique({
+                    where: { email },
+                });
+                await this.db.prisma.userMember.create({
+                    data: {
+                        email,
+                        user_id: existUser ? existUser.id : null,
+                        memberedId: user.id,
+                    },
+                });
+            }
+        }
+        await this.otpService.delTokenUser(key);
+        const token = await this.jwt.signAsync({ userId: user.id });
+        return token;
+    }
     async login(loginAuthDto) {
         const findEmail = await this.db.prisma.user.findUnique({
             where: {
@@ -59,23 +121,76 @@ let AuthService = class AuthService {
             where: {
                 id: userId,
             },
-            select: {
-                id: true,
-                email: true,
-                username: true,
+        });
+        if (!findUser)
+            throw new common_1.NotFoundException("User not found");
+        if (findUser.fileName) {
+            const img_url = await this.s3.getFileUrl(findUser.fileName);
+            return {
+                ...findUser,
+                img_url,
+            };
+        }
+        return findUser;
+    }
+    async getWorkload(userId) {
+        const findUser = await this.db.prisma.user.findUnique({
+            where: {
+                id: userId,
             },
         });
         if (!findUser)
-            throw new common_1.NotFoundException("Information not found");
-        return findUser;
+            throw new common_1.NotFoundException("User not found");
+        const members = await this.db.prisma.userMember.findMany({
+            where: {
+                memberedId: userId,
+            },
+            take: 4,
+            include: {
+                user: true,
+            },
+        });
+        if (members && members.length > 0) {
+            const updatedMembers = [];
+            for (const member of members) {
+                const fileName = member.user?.fileName;
+                if (fileName) {
+                    const img_url = await this.s3.getFileUrl(fileName);
+                    updatedMembers.push({ ...member, img_url });
+                }
+                else {
+                    updatedMembers.push(member);
+                }
+            }
+            return { updatedMembers };
+        }
+        return { members };
     }
-    async logout() { }
+    async updateUserData(data, userId) {
+        const user = await this.db.prisma.user.findFirst({
+            where: {
+                id: userId,
+            },
+        });
+        if (!user)
+            throw new common_1.NotFoundException("User not found");
+        const newUserData = await this.db.prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                ...data,
+            },
+        });
+        return newUserData;
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [otp_service_1.OtpService,
         prisma_service_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        s3Service_1.S3Service])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

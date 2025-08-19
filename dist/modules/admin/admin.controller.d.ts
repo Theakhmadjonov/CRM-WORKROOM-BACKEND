@@ -1,6 +1,5 @@
 import { AdminService } from "./admin.service";
 import { CreateQuestionDto } from "./dto/create-question.dto";
-import { QuestionAnswer } from "./dto/question-answer.dto";
 export declare class AdminController {
     private readonly adminService;
     constructor(adminService: AdminService);
@@ -22,7 +21,4 @@ export declare class AdminController {
         is_required: boolean;
         step_number: number;
     })[]>;
-    questionAnswer(questionAnswer: QuestionAnswer): Promise<{
-        message: string;
-    } | undefined>;
 }

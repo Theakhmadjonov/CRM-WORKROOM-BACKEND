@@ -16,7 +16,6 @@ exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
 const admin_service_1 = require("./admin.service");
 const create_question_dto_1 = require("./dto/create-question.dto");
-const question_answer_dto_1 = require("./dto/question-answer.dto");
 let AdminController = class AdminController {
     adminService;
     constructor(adminService) {
@@ -39,14 +38,6 @@ let AdminController = class AdminController {
             throw new common_1.HttpException(error.message, error.status);
         }
     }
-    async questionAnswer(questionAnswer) {
-        try {
-            return await this.adminService.addAnswerQuestion(questionAnswer);
-        }
-        catch (error) {
-            throw new common_1.HttpException(error.message, error.status);
-        }
-    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -63,14 +54,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "getQuestions", null);
-__decorate([
-    (0, common_1.Post)("question-answer"),
-    (0, common_1.HttpCode)(200),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [question_answer_dto_1.QuestionAnswer]),
-    __metadata("design:returntype", Promise)
-], AdminController.prototype, "questionAnswer", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)("admin"),
     __metadata("design:paramtypes", [admin_service_1.AdminService])

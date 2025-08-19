@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const database_module_1 = require("./database/database.module");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
+const storage_module_1 = require("./storage/storage.module");
 let CoreModule = class CoreModule {
 };
 exports.CoreModule = CoreModule;
@@ -19,6 +20,7 @@ exports.CoreModule = CoreModule = __decorate([
     (0, common_1.Module)({
         imports: [
             database_module_1.DatabaseModule,
+            storage_module_1.StorageModule,
             config_1.ConfigModule.forRoot({
                 envFilePath: '.env',
                 isGlobal: true,

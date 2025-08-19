@@ -53,6 +53,6 @@ export class RedisService implements OnModuleInit {
   }
 
   async setSessionTokenUser(phone: string, token: string) {
-    await this.redis.setex(`session:${phone}`, 300, token);
+    await this.redis.setex(`session:${phone}`, 3600, token);
   }
 }

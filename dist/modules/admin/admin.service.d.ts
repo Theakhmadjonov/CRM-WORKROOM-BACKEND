@@ -1,6 +1,5 @@
 import { CreateQuestionDto } from "./dto/create-question.dto";
 import { PrismaService } from "src/core/database/prisma.service";
-import { QuestionAnswer } from "./dto/question-answer.dto";
 export declare class AdminService {
     private db;
     constructor(db: PrismaService);
@@ -22,7 +21,4 @@ export declare class AdminService {
         is_required: boolean;
         step_number: number;
     })[]>;
-    addAnswerQuestion(questionAnswer: QuestionAnswer): Promise<{
-        message: string;
-    } | undefined>;
 }

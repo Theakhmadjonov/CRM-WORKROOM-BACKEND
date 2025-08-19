@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { RedisService } from 'src/core/database/redis.service';
-import { EskizService } from './eskiz.service';
-import generateOtp from 'src/utils/generate-otp';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { RedisService } from "src/core/database/redis.service";
+import { EskizService } from "./eskiz.service";
+import generateOtp from "src/utils/generate-otp";
 @Injectable()
 export class OtpService {
   private ttlExpireOtp: number = 60;
@@ -10,7 +10,7 @@ export class OtpService {
   private maxFailedOtpAttempt: number = 5;
   constructor(
     private redisService: RedisService,
-    private eskizService: EskizService,
+    private eskizService: EskizService
   ) {}
 
   getSessionToken() {
@@ -37,14 +37,14 @@ export class OtpService {
     await this.redisService.addKey(key, otpCode, this.ttlExpireOtp);
     await this.trackSmsRequest(phone_number);
     return {
-      message: 'otp sended',
+      message: "otp sended",
     };
   }
   async checkSmsLimit(key: string) {
     const otpKeyHourly = `sms:otp:${key}:limit:hourly`;
     const valueOtpHourly = await this.redisService.getKeyValue(otpKeyHourly);
     if (valueOtpHourly && +valueOtpHourly > this.hourlyOtpAttempts)
-      throw new BadRequestException('otp hourly limit reached');
+      throw new BadRequestException("otp hourly limit reached");
   }
   async trackSmsRequest(key: string) {
     const keyOtpHourly = `sms:otp:${key}:limit:hourly`;
@@ -65,11 +65,11 @@ export class OtpService {
       await this.redisService.addKey(
         keyBlockedUser,
         JSON.stringify({
-          reason: 'Max Otp Attempts',
+          reason: "Max Otp Attempts",
           blockedAt: new Date(),
           unblockAt: new Date().setMinutes(5),
         }),
-        300,
+        300
       );
       await this.redisService.delKey(keyFailedAttempts);
     }
@@ -81,14 +81,21 @@ export class OtpService {
     if (value !== code) {
       await this.recordFailedAttempts(phone_number);
       throw new BadRequestException({
-        message: 'wrong otp password',
+        message: "wrong otp password",
       });
     }
     await this.redisService.delKey(key);
     await this.redisService.delKey(`sms:otp:${phone_number}:failed:attempts`);
     const sessionToken = this.getSessionToken();
-    
+    await this.redisService.setSessionTokenUser(phone_number, sessionToken);
     return sessionToken;
+  }
+
+  async checkTokenUser(key: string, token: string) {
+    const sessionToken = await this.redisService.getKeyValue(key);
+    if (!sessionToken || sessionToken !== token)
+      throw new BadRequestException("Session token expired");
+    return true;
   }
 
   async isBlockedUser(phone_number: string) {
@@ -99,5 +106,9 @@ export class OtpService {
       throw new BadRequestException({
         message: `You blocked! Please try again after ${ttl}`,
       });
+  }
+
+  async delTokenUser(key: string) {
+    await this.redisService.delKey(key);
   }
 }

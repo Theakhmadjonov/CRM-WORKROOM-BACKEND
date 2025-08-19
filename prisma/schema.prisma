@@ -16,10 +16,19 @@ enum QuestionType {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  email    String? @unique
-  username String  @unique
-  password String
+  id           String       @id @default(uuid())
+  position     String?
+  company      String?
+  location     String?
+  birth_date   DateTime?
+  phone_number String?      @unique
+  skype        String?
+  email        String?      @unique
+  username     String       @unique
+  password     String
+  fileName     String?
+  level        String?
+  UserMember   UserMember[]
 
   @@map("users")
 }
@@ -49,8 +58,8 @@ model QuestionOptions {
 model UserProfileQuestionAnswers {
   id             String                  @id @default(uuid())
   question_id    String                  @unique
-  answer_text    String
-  user_id        String?
+  answer_text    String?
+  user_id        String
   question       UserProfileQuestions    @relation(fields: [question_id], references: [id], onDelete: Cascade)
   answer_options SelectedAnswerOptions[]
 
@@ -65,4 +74,14 @@ model SelectedAnswerOptions {
 
   @@unique([answer_id, option_id])
   @@map("selected_answer_options")
+}
+
+model UserMember {
+  id         String  @id @default(uuid())
+  email      String
+  memberedId String?
+  user_id    String?
+  user       User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_members")
 }

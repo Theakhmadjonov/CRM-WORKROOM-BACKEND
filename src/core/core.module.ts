@@ -2,10 +2,12 @@ import { Global, Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { StorageModule } from './storage/storage.module';
 @Global()
 @Module({
   imports: [
     DatabaseModule,
+    StorageModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,

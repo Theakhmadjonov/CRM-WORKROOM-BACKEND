@@ -63,7 +63,7 @@ let RedisService = RedisService_1 = class RedisService {
         await this.redis.incr(key);
     }
     async setSessionTokenUser(phone, token) {
-        await this.redis.setex(`session:${phone}`, 300, token);
+        await this.redis.setex(`session:${phone}`, 3600, token);
     }
 };
 exports.RedisService = RedisService;

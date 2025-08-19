@@ -1,9 +1,10 @@
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from "src/core/database/prisma.service";
+import { S3Service } from "src/core/storage/s3/s3Service";
 export declare class UsersService {
-    create(createUserDto: CreateUserDto): string;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateUserDto: UpdateUserDto): string;
-    remove(id: number): string;
+    private db;
+    private s3;
+    constructor(db: PrismaService, s3: S3Service);
+    update(file: Express.Multer.File): Promise<{
+        url: string;
+    }>;
 }

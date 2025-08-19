@@ -33,13 +33,13 @@ export class AdminController {
     }
   }
 
-  @Post("question-answer")
-  @HttpCode(200)
-  async questionAnswer(@Body() questionAnswer: QuestionAnswer) {
-    try {
-      return await this.adminService.addAnswerQuestion(questionAnswer);
-    } catch (error) {
-      throw new HttpException(error.message, error.status);
-    }
-  }
+  // @Post("question-answer")
+  // @HttpCode(200)
+  // async questionAnswer(@Body() questionAnswer: QuestionAnswer) {
+  //   try {
+  //     return await this.adminService.addAnswerQuestion(questionAnswer);
+  //   } catch (error) {
+  //     throw new HttpException(error.message, error.status);
+  //   }
+  // }
 }

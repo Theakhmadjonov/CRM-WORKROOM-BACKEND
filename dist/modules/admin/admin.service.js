@@ -54,28 +54,6 @@ let AdminService = class AdminService {
         });
         return questions;
     }
-    async addAnswerQuestion(questionAnswer) {
-        await this.db.prisma.userProfileQuestionAnswers.create({
-            data: {
-                answer_text: questionAnswer.answer_text,
-                question_id: questionAnswer.question_id,
-            },
-        });
-        if (questionAnswer?.answer_options) {
-            const answerOptions = questionAnswer.answer_options.map(({ answer_id, option_id }) => {
-                return this.db.prisma.selectedAnswerOptions.create({
-                    data: {
-                        option_id,
-                        answer_id,
-                    },
-                });
-            });
-            await Promise.all([...answerOptions]);
-            return {
-                message: "Answers added",
-            };
-        }
-    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
