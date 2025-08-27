@@ -15,4 +15,13 @@ export class UsersService {
     const signedUrl = await this.s3.getFileUrl(fileName);
     return { url: signedUrl };
   }
+
+  async checkEmail(email: string) {
+    const emailExists = await this.db.prisma.user.findFirst({
+      where: {
+        email,
+      },
+    });
+    return emailExists ? true : false;
+  }
 }

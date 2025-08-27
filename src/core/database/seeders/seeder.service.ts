@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { ConfigService } from "@nestjs/config";
 import bcrypt from "bcrypt";
+
 @Injectable()
 export class SeederService implements OnModuleInit {
   username: string;
