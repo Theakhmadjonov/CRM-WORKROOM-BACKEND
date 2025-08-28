@@ -12,6 +12,7 @@ const database_module_1 = require("./database/database.module");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const storage_module_1 = require("./storage/storage.module");
+const nestjs_resend_1 = require("nestjs-resend");
 let CoreModule = class CoreModule {
 };
 exports.CoreModule = CoreModule;
@@ -22,19 +23,26 @@ exports.CoreModule = CoreModule = __decorate([
             database_module_1.DatabaseModule,
             storage_module_1.StorageModule,
             config_1.ConfigModule.forRoot({
-                envFilePath: '.env',
+                envFilePath: ".env",
                 isGlobal: true,
             }),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 global: true,
                 useFactory: (configService) => ({
-                    secret: configService.get('JWT_SECRET_KEY'),
+                    secret: configService.get("JWT_SECRET_KEY"),
                     signOptions: {
-                        expiresIn: '1h',
+                        expiresIn: "1h",
                     },
                 }),
                 inject: [config_1.ConfigService],
+            }),
+            nestjs_resend_1.ResendModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: async (config) => ({
+                    apiKey: config.get("RESEND_API_KEY"),
+                }),
             }),
         ],
         exports: [],

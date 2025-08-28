@@ -2,14 +2,12 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
   HttpException,
   Post,
-  Query,
+  Query
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { CreateQuestionDto } from "./dto/create-question.dto";
-import { QuestionAnswer } from "./dto/question-answer.dto";
 
 @Controller("admin")
 export class AdminController {
@@ -23,10 +21,9 @@ export class AdminController {
       throw new HttpException(error.message, error.status);
     }
   }
-  @Get("questions")
+  @Get("user-profile/questions")
   async getQuestions(@Query("step_number") step_number: string) {
     try {
-      console.log("So`rov keldi");
       return await this.adminService.getQuestions(+step_number);
     } catch (error) {
       throw new HttpException(error.message, error.status);

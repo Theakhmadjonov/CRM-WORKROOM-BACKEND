@@ -13,7 +13,7 @@ import {
 import { AuthService } from "./auth.service";
 import { SendOtpDto } from "./dto/send-otp.dto";
 import { VerifySmsCodeDto } from "./dto/verify.sms.code.dto";
-import { LoginAuthDto } from "./dto/create-auth.dto";
+import { LoginAuthDto, RegisterAuthDto } from "./dto/create-auth.dto";
 import { Request, Response } from "express";
 import { SignUpDto } from "./dto/second-step.dto";
 import { AuthGuard } from "src/common/guards/auth.guard";
@@ -26,7 +26,6 @@ export class AuthController {
   @HttpCode(200)
   async sendOtp(@Body() body: SendOtpDto) {
     try {
-      console.log(111);
       return await this.authService.sendOtp(body);
     } catch (error) {
       throw new HttpException(error.message, error.status);
@@ -58,7 +57,7 @@ export class AuthController {
   @Post("register")
   @HttpCode(200)
   async register(
-    @Body() data: SignUpDto,
+    @Body() data: RegisterAuthDto,
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request
   ) {
@@ -68,7 +67,7 @@ export class AuthController {
       res.cookie("token", token, {
         httpOnly: true,
         path: "/",
-        maxAge: 3600 * 2,
+        maxAge: 2 * 24 * 60 * 60 * 1000,
         secure: false,
         sameSite: "lax",
       });
@@ -89,7 +88,7 @@ export class AuthController {
     res.cookie("token", token, {
       httpOnly: true,
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 2 * 24 * 60 * 60 * 1000,
       secure: false,
       sameSite: "lax",
     });
@@ -97,8 +96,8 @@ export class AuthController {
     return { token };
   }
 
-  @UseGuards(AuthGuard)
   @Get("me")
+  @UseGuards(AuthGuard)
   async me(@Req() req: Request) {
     try {
       const userId = req["userId"];
@@ -113,16 +112,13 @@ export class AuthController {
   @Get("workload")
   async getWorkload(@Req() req: Request) {
     const userId = req["userId"];
-    console.log("jnxnjsxmk");
     const workloads = await this.authService.getWorkload(userId);
     return workloads;
   }
 
   @Get("check")
   async check(@Req() req: Request) {
-    console.log("ssxsxsxwqxsax");
     const token = req.cookies["token"];
-    console.log(token);
     if (!token) return false;
     return true;
   }

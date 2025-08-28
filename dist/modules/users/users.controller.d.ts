@@ -9,4 +9,15 @@ export declare class UsersController {
     chechkEmail(data: {
         email: string;
     }): Promise<boolean>;
+    sendEmailVerificationLink(data: {
+        email: string;
+    }): Promise<{
+        message: string;
+    }>;
+    verifyEmailLink(data: {
+        newPassword: string;
+        token: string;
+    }): Promise<{
+        message: string;
+    }>;
 }

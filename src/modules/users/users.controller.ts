@@ -1,25 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  Put,
-  UseInterceptors,
-  UseGuards,
-  Req,
-  HttpException,
-  UploadedFile,
+  Controller,
   HttpCode,
+  HttpException,
+  HttpStatus,
+  Post,
+  Put,
+  Req,
+  UploadedFile,
+  UseInterceptors
 } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { AuthGuard } from "src/common/guards/auth.guard";
 import { Request } from "express";
+import { UsersService } from "./users.service";
 
 @Controller("user")
 export class UsersController {
@@ -41,5 +34,27 @@ export class UsersController {
   async chechkEmail(@Body() data: { email: string }) {
     console.log("Emailga sorov keldi");
     return await this.usersService.checkEmail(data.email);
+  }
+
+  @Post("forgot-password")
+  @HttpCode(200)
+  async sendEmailVerificationLink(@Body() data: { email: string }) {
+    try {
+      return await this.usersService.sendEmailVerificationLink(data.email);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post("reset-password")
+  async verifyEmailLink(
+    @Body() data: { newPassword: string, token: string }
+  ) {
+    try {
+      console.log("pass keldi", data);
+      return await this.usersService.verifyUserEmail(data.token, data.newPassword);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

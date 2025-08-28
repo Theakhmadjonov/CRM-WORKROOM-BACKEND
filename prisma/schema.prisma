@@ -15,32 +15,67 @@ enum QuestionType {
   button
 }
 
+enum Roles {
+  business_owner
+  employee
+  admin
+}
+
+enum Status {
+  pending
+  accepted
+  expired
+  cancelled
+}
+
 model User {
-  id           String       @id @default(uuid())
-  position     String?
-  company      String?
-  location     String?
-  birth_date   DateTime?
-  phone_number String?      @unique
-  skype        String?
-  email        String?      @unique
-  username     String       @unique
-  password     String
-  fileName     String?
-  level        String?
-  UserMember   UserMember[]
+  id                         String                       @id @default(uuid())
+  position                   String?
+  first_name                 String?
+  last_name                  String?
+  role                       Roles                        @default(employee)
+  is_email_verified          Boolean                      @default(false)
+  company                    String?
+  location                   String?
+  birth_date                 DateTime?
+  phone_number               String?                      @unique
+  skype                      String?
+  email                      String?                      @unique
+  username                   String?                      @unique
+  password                   String
+  fileName                   String?
+  level                      String?
+  created_at                 DateTime                     @default(now())
+  updated_at                 DateTime                     @default(now()) @updatedAt
+  MemberInvitations          MemberInvitations[]
+  UserProfileQuestionAnswers UserProfileQuestionAnswers[]
 
   @@map("users")
 }
 
+model MemberInvitations {
+  id                 String    @id @default(uuid())
+  email              String
+  invited_by_user_id String
+  invitation_token   String
+  status             Status    @default(pending)
+  expires_at         DateTime
+  sent_at            DateTime  @default(now())
+  accepted_at        DateTime?
+  Users              User      @relation(fields: [invited_by_user_id], references: [id], onDelete: Cascade)
+
+  @@map("member_invitations")
+}
+
 model UserProfileQuestions {
-  id            String                      @id @default(uuid())
-  question_text String                      @unique
+  id            String                       @id @default(uuid())
+  question_text String                       @unique
   question_type QuestionType
-  is_required   Boolean                     @default(false)
+  is_required   Boolean                      @default(false)
   step_number   Int
+  order_number  Int?
   options       QuestionOptions[]
-  answer        UserProfileQuestionAnswers?
+  answer        UserProfileQuestionAnswers[]
 
   @@map("user_profile_questions")
 }
@@ -50,6 +85,7 @@ model QuestionOptions {
   question_id  String
   option_text  String
   option_value String
+  order_number Int?
   question     UserProfileQuestions @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
   @@map("question_options")
@@ -62,7 +98,9 @@ model UserProfileQuestionAnswers {
   user_id        String
   question       UserProfileQuestions    @relation(fields: [question_id], references: [id], onDelete: Cascade)
   answer_options SelectedAnswerOptions[]
+  user           User                    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@unique([question_id, user_id])
   @@map("user_profile_question_anwsers")
 }
 
@@ -76,12 +114,12 @@ model SelectedAnswerOptions {
   @@map("selected_answer_options")
 }
 
-model UserMember {
-  id         String  @id @default(uuid())
-  email      String
-  memberedId String?
-  user_id    String?
-  user       User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+// model UserMember {
+//   id         String  @id @default(uuid())
+//   email      String
+//   memberedId String?
+//   user_id    String?
+//   user       User?   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@map("user_members")
-}
+//   @@map("user_members")
+// }

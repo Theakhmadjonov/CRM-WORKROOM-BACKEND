@@ -34,6 +34,23 @@ let UsersController = class UsersController {
         console.log("Emailga sorov keldi");
         return await this.usersService.checkEmail(data.email);
     }
+    async sendEmailVerificationLink(data) {
+        try {
+            return await this.usersService.sendEmailVerificationLink(data.email);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async verifyEmailLink(data) {
+        try {
+            console.log("pass keldi", data);
+            return await this.usersService.verifyUserEmail(data.token, data.newPassword);
+        }
+        catch (error) {
+            throw new common_1.HttpException(error, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -53,6 +70,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "chechkEmail", null);
+__decorate([
+    (0, common_1.Post)("forgot-password"),
+    (0, common_1.HttpCode)(200),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "sendEmailVerificationLink", null);
+__decorate([
+    (0, common_1.Post)("reset-password"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "verifyEmailLink", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)("user"),
     __metadata("design:paramtypes", [users_service_1.UsersService])
